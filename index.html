@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Eat The Fish</title>
+ <style>
+ body {
+ margin: 0;
+ padding: 0;
+ background-color: #050b1a;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ height: 100vh;
+ overflow: hidden;
+ color: white;
+ font-family: Arial, sans-serif;
+ }
+ canvas {
+ border: 4px solid #1a365df0;
+ background: linear-gradient(to bottom, #006994, #003366);
+ box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+ cursor: none;
+ }
+ #score-board {
+ position: absolute;
+ top: 20px;
+ font-size: 24px;
+ font-weight: bold;
+ text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+ }
+ </style>
+</head>
+<body>
+
+ <div id="score-board">Fish Eaten: <span id="score">0</span></div>
+ <canvas id="gameCanvas"></canvas>
+
+ <script>
+ const canvas = document.getElementById('gameCanvas');
+ const ctx = canvas.getContext('2d');
+ const scoreElement = document.getElementById('score');
+
+ canvas.width = 800;
+ canvas.height = 600;
+
+ let score = 0;
+ let gameActive = true;
+
+ const shark = {
+ x: canvas.width / 2,
+ y: canvas.height / 2,
+ size: 40,
+ speed: 0.1 // Smoothness of following the mouse
+ };
+
+ const fishes = [];
+ const maxFishes = 15;
+
+ class Fish {
+ constructor() {
+ this.reset();
+ }
+
+ reset() {
+ this.size = Math.random() * 10 + 10;
+ this.x = Math.random() < 0.5 ? -this.size : canvas.width + this.size;
+ this.y = Math.random() * canvas.height;
+ // Move towards opposite side
+ const angle = Math.atan2((canvas.height/2) - this.y, (canvas.width/2) - this.x) + (Math.random() - 0.5) * 0.5;
+ this.speed = Math.random() * 2 + 1;
+ this.vx = Math.cos(angle) * this.speed;
+ this.vy = Math.sin(angle) * this.speed;
+ this.color = `hsl(${Math.random() * 60 + 180}, 80%, 60%)`;
+ }
+
+ update() {
+ this.x += this.vx;
+ this.y += this.vy;
+
+ // Wrap around screen slightly or respawn if too far off
+ if (this.x < -100 || this.x > canvas.width + 100 || this.y < -100 || this.y > canvas.height + 100) {
+ this.reset();
+ }
+ }
+
+ draw() {
+ ctx.fillStyle = this.color;
+ ctx.beginPath();
+ // Draw little fish shape
+ ctx.moveTo(this.x, this.y);
+ ctx.quadraticCurveTo(this.x - this.size, this.y - this.size / 2, this.x - this.size * 1.5, this.y);
+ ctx.quadraticCurveTo(this.x - this.size, this.y + this.size / 2, this.x, this.y);
+ ctx.fill();
+ 
+ // Tail
+ ctx.beginPath();
+ ctx.moveTo(this.x - this.size * 1.5, this.y);
+ ctx.lineTo(this.x - this.size * 2, this.y - this.size / 2);
+ ctx.lineTo(this.x - this.size * 2, this.y + this.size / 2);
+ ctx.closePath();
+ ctx.fill();
+ }
+ }
+
+ // Initialize fishes
+ for (let i = 0; i < maxFishes; i++) {
+ fishes.push(new Fish());
+ }
+
+ // Track mouse position
+ let mouseX = canvas.width / 2;
+ let mouseY = canvas.height / 2;
+
+ canvas.addEventListener('mousemove', (e) => {
+ const rect = canvas.getBoundingClientRect();
+ mouseX = e.clientX - rect.left;
+ mouseY = e.clientY - rect.top;
+ });
+
+ function drawShark() {
+ ctx.fillStyle = '#718096';
+ ctx.save();
+ ctx.translate(shark.x, shark.y);
+
+ // Face direction of movement
+ const angle = Math.atan2(mouseY - shark.y, mouseX - shark.x);
+ ctx.rotate(angle);
+
+ // Draw Shark Body
+ ctx.beginPath();
+ ctx.moveTo(0, 0);
+ ctx.quadraticCurveTo(-shark.size, -shark.size / 2, -shark.size * 2, 0);
+ ctx.quadraticCurveTo(-shark.size, shark.size / 2, 0, 0);
+ ctx.fill();
+
+ // Dorsal Fin
+ ctx.beginPath();
+ ctx.moveTo(-shark.size * 0.8, -10);
+ ctx.lineTo(-shark.size * 1.2, -shark.size);
+ ctx.lineTo(-shark.size * 0.4, -10);
+ ctx.fill();
+
+ // Tail
+ ctx.beginPath();
+ ctx.moveTo(-shark.size * 2, 0);
+ ctx.lineTo(-shark.size * 2.5, -shark.size / 2);
+ ctx.lineTo(-shark.size * 2.5, shark.size / 2);
+ ctx.closePath();
+ ctx.fill();
+
+ // Eye
+ ctx.fillStyle = 'white';
+ ctx.beginPath();
+ ctx.arc(-shark.size * 0.3, -shark.size * 0.1, 4, 0, Math.PI * 2);
+ ctx.fill();
+ ctx.fillStyle = 'black';
+ ctx.beginPath();
+ ctx.arc(-shark.size * 0.3, -shark.size * 0.1, 2, 0, Math.PI * 2);
+ ctx.fill();
+
+ ctx.restore();
+ }
+
+ function checkCollision() {
+ for (let i = fishes.length - 1; i >= 0; i--) {
+ const f = fishes[i];
+ const dist = Math.hypot(shark.x - f.x, shark.y - f.y);
+
+ if (dist < shark.size) {
+ score++;
+ scoreElement.innerText = score;
+ fishes.splice(i, 1);
+ 
+ // Spawn new fish
+ setTimeout(() => {
+ fishes.push(new Fish());
+ }, 500);
+ }
+ }
+ }
+
+ function gameLoop() {
+ if (!gameActive) return;
+
+ ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+ // Move shark smoothly towards mouse
+ shark.x += (mouseX - shark.x) * shark.speed;
+ shark.y += (mouseY - shark.y) * shark.speed;
+
+ fishes.forEach(fish => {
+ fish.update();
+ fish.draw();
+ });
+
+ checkCollision();
+ drawShark();
+
+ requestAnimationFrame(gameLoop);
+ }
+
+ gameLoop();
+ </script>
+</body>
+</html>
