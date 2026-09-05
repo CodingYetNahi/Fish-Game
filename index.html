@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
  <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0", maximum -scale=1.0, user-scalable=no>
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
  <title>Eat The Fish - Ocean Arcade</title>
  <style>
   :root {
@@ -31,7 +31,11 @@
     font-family: Georgia, 'Times New Roman', serif;
   }
 
-  .game-shell { position: relative; width: min(100vw, 900px, calc((100dvh - 24px) * 4 / 3)); }
+  .game-shell {
+    position: relative;
+    width: min(calc(100vw - 16px), 900px, calc((100dvh - 16px) * 4 / 3));
+    aspect-ratio: 4 / 3;
+  }
 
   .brand {
     position: absolute;
@@ -51,8 +55,7 @@
   canvas {
     display: block;
     width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 3;
+    height: 100%;
     border: 2px solid rgba(159, 232, 218, 0.35);
     border-radius: 22px;
     background: linear-gradient(to bottom, #082a37, #06161e);
@@ -213,6 +216,23 @@
     #hint { display: none; }
     canvas { border-radius: 16px; }
     }
+
+    @media (orientation: portrait) and (max-width: 620px) {
+      .game-shell {
+        width: min(calc(100vw - 12px), calc((100dvh - 12px) * 3 / 4));
+        aspect-ratio: 3 / 4;
+      }
+    }
+
+    select, input { accent-color: var(--mint); }
+    select {
+      max-width: 150px;
+      padding: 7px;
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      background: #0b3039;
+      color: var(--white);
+    }
  </style>
 </head>
 <body>
@@ -236,6 +256,14 @@
  <div id="settings-panel" role="dialog" aria-label="Game settings">
   <h2>Settings</h2>
   <label class="setting-row" for="music-toggle">Ocean music <input id="music-toggle" type="checkbox" checked></label>
+  <label class="setting-row" for="music-theme">Music theme
+   <select id="music-theme">
+    <option value="reef">Coral Reef</option>
+    <option value="deep">Deep Blue</option>
+    <option value="tide">Moonlit Tide</option>
+   </select>
+  </label>
+  <label class="setting-row" for="sound-toggle">Sound effects <input id="sound-toggle" type="checkbox" checked></label>
   <button id="settings-close-btn" class="menu-button primary" type="button">Done</button>
  </div>
 
@@ -251,453 +279,462 @@
  <script>
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
-  const scoreElement = document.getElementById('score');
-  const levelElement = document.getElementById('level');
-  const targetElement = document.getElementById('target');
-  const timerElement = document.getElementById('timer');
-  const bonusBoard = document.getElementById('bonus-board');
-  const bonusElement = document.getElementById('bonus');
-  const statusBanner = document.getElementById('status-banner');
-  const statusTitle = document.getElementById('status-title');
-  const statusMessage = document.getElementById('status-message');
-  const restartBtn = document.getElementById('restart-btn');
-  const pauseBtn = document.getElementById('pause-btn');
-  const pauseMenu = document.getElementById('pause-menu');
-  const resumeBtn = document.getElementById('resume-btn');
-  const pauseRestartBtn = document.getElementById('pause-restart-btn');
-  const settingsBtn = document.getElementById('settings-btn');
-  const settingsPanel = document.getElementById('settings-panel');
-  const settingsCloseBtn = document.getElementById('settings-close-btn');
-  const musicToggle = document.getElementById('music-toggle');
+  const ui = Object.fromEntries([
+    'score', 'level', 'target', 'timer', 'bonus', 'bonus-board', 'status-banner',
+    'status-title', 'status-message', 'restart-btn', 'pause-btn', 'pause-menu',
+    'resume-btn', 'pause-restart-btn', 'settings-btn', 'settings-panel',
+    'settings-close-btn', 'music-toggle', 'music-theme', 'sound-toggle'
+  ].map((id) => [id, document.getElementById(id)]));
 
-  canvas.width = 800;
-  canvas.height = 600;
+  const world = { width: 800, height: 600 };
+  const shark = { x: 400, y: 300, size: 32, speed: 0.11, angle: 0 };
+  const fishes = [];
+  const maxFishes = 12;
+  const fishPalettes = [
+    ['#ffd166', '#f4a261', '#5b3a29'],
+    ['#75e6da', '#2cb5a8', '#123d46'],
+    ['#ff91af', '#e85d88', '#51253b'],
+    ['#a8d8ff', '#5599d6', '#173b62'],
+    ['#c3f584', '#68b95b', '#244d31']
+  ];
 
   let score = 0;
   let level = 1;
   let levelTarget = 10;
   let levelCaught = 0;
-  let timer = 30;
+  let timeLeft = 30;
   let gameActive = true;
-  let timerInterval = null;
   let paused = false;
-  let audioContext = null;
-  let musicTimer = null;
+  let pointerX = world.width / 2;
+  let pointerY = world.height / 2;
+  let lastFrame = performance.now();
+  let audioContext;
+  let musicTimer;
   let musicStep = 0;
+  let bonusTimer;
 
-  const shark = {
-   x: canvas.width / 2,
-   y: canvas.height / 2,
-    size: 30,
-   speed: 0.1
-  };
+  function resizeGame() {
+    const portrait = matchMedia('(orientation: portrait) and (max-width: 620px)').matches;
+    const nextWidth = portrait ? 600 : 800;
+    const nextHeight = portrait ? 800 : 600;
+    const scaleX = nextWidth / world.width;
+    const scaleY = nextHeight / world.height;
 
-  const fishes = [];
-  const maxFishes = 12;
+    shark.x *= scaleX;
+    shark.y *= scaleY;
+    pointerX *= scaleX;
+    pointerY *= scaleY;
+    fishes.forEach((fish) => {
+      fish.x *= scaleX;
+      fish.y *= scaleY;
+      fish.memoryX *= scaleX;
+      fish.memoryY *= scaleY;
+    });
+    world.width = nextWidth;
+    world.height = nextHeight;
+
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(canvas.width / world.width, 0, 0, canvas.height / world.height, 0, 0);
+  }
 
   function updateHud() {
-   scoreElement.textContent = score;
-   levelElement.textContent = level;
-   targetElement.textContent = levelTarget;
-   timerElement.textContent = timer.toFixed(1);
+    ui.score.textContent = score;
+    ui.level.textContent = level;
+    ui.target.textContent = levelTarget;
+    ui.timer.textContent = timeLeft.toFixed(1);
   }
 
-  function startTimer() {
-   clearInterval(timerInterval);
-   timerInterval = setInterval(() => {
-    if (!gameActive) return;
-    timer = Math.max(0, timer - 0.1);
-    timerElement.textContent = timer.toFixed(1);
-    if (timer <= 0) {
-     endGame(false);
-    }
-   }, 100);
-  }
-
-  function setLevelSettings() {
-    levelTarget = 10 + (level - 1) * 5;
-    timer = getLevelTime();
-   updateHud();
-  }
-
-    function getLevelTime() {
+  function levelTime() {
     return Math.min(90, 25 + levelTarget * 0.5);
-    }
+  }
 
-  function createFish() {
-   const fish = {
-    x: 0,
-    y: 0,
-    size: shark.size * (0.28 + Math.random() * 0.08),
-    vx: (Math.random() - 0.5) * 2.6,
-    vy: (Math.random() - 0.5) * 2.6,
-    speed: 1.3 + Math.random() * 1.8,
-    learning: 0.4 + Math.random() * 1.2,
-    memoryX: canvas.width / 2,
-    memoryY: canvas.height / 2,
-    panic: 0
-   };
-    spawnFishAtEdge(fish);
-    return fish;
-    }
+  function setLevel() {
+    levelTarget = 10 + (level - 1) * 5;
+    timeLeft = levelTime();
+    updateHud();
+  }
 
-    function spawnFishAtEdge(fish, side = Math.random() < 0.5 ? 'left' : 'right') {
-    const edgeOffset = fish.size * 3;
-    fish.x = side === 'left' ? -edgeOffset : canvas.width + edgeOffset;
-    fish.y = fish.size + Math.random() * (canvas.height - fish.size * 2);
+  function spawnFishAtEdge(fish, side = Math.random() < 0.5 ? 'left' : 'right') {
+    const offset = fish.size * 3;
+    fish.x = side === 'left' ? -offset : world.width + offset;
+    fish.y = fish.size * 2 + Math.random() * (world.height - fish.size * 4);
     fish.vx = side === 'left' ? 1.4 + Math.random() * 1.2 : -1.4 - Math.random() * 1.2;
     fish.vy = (Math.random() - 0.5) * 2.2;
-    fish.memoryX = canvas.width / 2;
-    fish.memoryY = canvas.height / 2;
+    fish.memoryX = world.width / 2;
+    fish.memoryY = world.height / 2;
+  }
+
+  function createFish() {
+    const fish = {
+      x: 0, y: 0,
+      size: shark.size * (0.31 + Math.random() * 0.11),
+      vx: 0, vy: 0,
+      speed: 1.3 + Math.random() * 1.8,
+      learning: 0.4 + Math.random() * 1.2,
+      memoryX: world.width / 2,
+      memoryY: world.height / 2,
+      panic: 0,
+      palette: fishPalettes[Math.floor(Math.random() * fishPalettes.length)],
+      stripe: Math.random() > 0.45
+    };
+    spawnFishAtEdge(fish);
+    return fish;
   }
 
   function populateFish() {
-   fishes.length = 0;
-   for (let i = 0; i < maxFishes; i++) {
-    fishes.push(createFish());
-   }
+    fishes.length = 0;
+    for (let i = 0; i < maxFishes; i += 1) fishes.push(createFish());
   }
 
   function resetGame() {
-   score = 0;
-   level = 1;
+    score = 0;
+    level = 1;
     levelCaught = 0;
     paused = false;
-   setLevelSettings();
-   gameActive = true;
-   statusBanner.style.display = 'none';
-    pauseMenu.style.display = 'none';
-    settingsPanel.style.display = 'none';
-    bonusBoard.style.display = 'none';
-   shark.x = canvas.width / 2;
-   shark.y = canvas.height / 2;
-   populateFish();
-   startTimer();
-   updateHud();
+    gameActive = true;
+    setLevel();
+    ui['status-banner'].style.display = 'none';
+    ui['pause-menu'].style.display = 'none';
+    ui['settings-panel'].style.display = 'none';
+    ui['bonus-board'].style.display = 'none';
+    ui['pause-btn'].textContent = 'Pause';
+    shark.x = pointerX = world.width / 2;
+    shark.y = pointerY = world.height / 2;
+    shark.angle = 0;
+    populateFish();
+    lastFrame = performance.now();
   }
 
-  function endGame(success) {
-   gameActive = false;
-   clearInterval(timerInterval);
+  function endGame(won) {
+    gameActive = false;
+    paused = false;
     stopMusic();
-    pauseMenu.style.display = 'none';
-    settingsPanel.style.display = 'none';
-   statusBanner.style.display = 'block';
-
-    if (success) {
-     statusTitle.textContent = 'Ocean Master!';
-     statusMessage.textContent = `You cleared all 100 levels with a score of ${score}.`;
-    } else {
-    statusTitle.textContent = 'Game Over';
-    statusMessage.textContent = `You reached level ${level}. Final score: ${score}.`;
-   }
+    ui['pause-menu'].style.display = 'none';
+    ui['settings-panel'].style.display = 'none';
+    ui['status-banner'].style.display = 'block';
+    ui['status-title'].textContent = won ? 'Ocean Master!' : 'Game Over';
+    ui['status-message'].textContent = won
+      ? `You cleared all 100 levels with a score of ${score}.`
+      : `You reached level ${level}. Final score: ${score}.`;
   }
 
   function setPaused(nextPaused) {
-   if (!gameActive && !paused) return;
-   paused = nextPaused;
-   gameActive = !paused;
-   pauseMenu.style.display = paused ? 'block' : 'none';
-   pauseBtn.textContent = paused ? 'Paused' : 'Pause';
-   if (paused) stopMusic();
-   else if (musicToggle.checked) startMusic();
+    if (!gameActive && !paused) return;
+    paused = nextPaused;
+    gameActive = !nextPaused;
+    ui['pause-menu'].style.display = nextPaused ? 'block' : 'none';
+    ui['pause-btn'].textContent = nextPaused ? 'Paused' : 'Pause';
+    lastFrame = performance.now();
+    if (nextPaused) stopMusic();
+    else startMusic();
+  }
+
+  const musicThemes = {
+    reef: { wave: 'sine', tempo: 760, notes: [261.63, 329.63, 392, 523.25, 392, 329.63, 293.66, 349.23] },
+    deep: { wave: 'triangle', tempo: 980, notes: [130.81, 196, 164.81, 220, 174.61, 196] },
+    tide: { wave: 'sine', tempo: 620, notes: [220, 277.18, 329.63, 415.3, 369.99, 329.63, 277.18, 246.94] }
+  };
+
+  function ensureAudio() {
+    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
+    return audioContext;
+  }
+
+  function playTone(frequency, duration, volume, wave = 'sine') {
+    const audio = ensureAudio();
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.type = wave;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, audio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(volume, audio.currentTime + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + duration);
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start();
+    oscillator.stop(audio.currentTime + duration + 0.03);
   }
 
   function startMusic() {
-   if (!musicToggle.checked || musicTimer) return;
-   audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
-   audioContext.resume();
-   const notes = [220, 277.18, 329.63, 415.3, 329.63, 277.18];
-   musicTimer = setInterval(() => {
-    if (!gameActive || !musicToggle.checked) return;
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    oscillator.type = 'sine';
-    oscillator.frequency.value = notes[musicStep++ % notes.length];
-    gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.035, audioContext.currentTime + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.7);
-    oscillator.connect(gain).connect(audioContext.destination);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.75);
-   }, 850);
+    if (!ui['music-toggle'].checked || musicTimer || !gameActive) return;
+    const playNext = () => {
+      if (!gameActive || !ui['music-toggle'].checked) return;
+      const theme = musicThemes[ui['music-theme'].value];
+      playTone(theme.notes[musicStep % theme.notes.length], theme.tempo / 1100, 0.025, theme.wave);
+      if (musicStep % 4 === 0) playTone(theme.notes[(musicStep + 2) % theme.notes.length] / 2, theme.tempo / 900, 0.012, 'sine');
+      musicStep += 1;
+    };
+    playNext();
+    musicTimer = setInterval(playNext, musicThemes[ui['music-theme'].value].tempo);
   }
 
   function stopMusic() {
-   clearInterval(musicTimer);
-   musicTimer = null;
+    clearInterval(musicTimer);
+    musicTimer = null;
+  }
+
+  function playCatchSound() {
+    if (!ui['sound-toggle'].checked) return;
+    playTone(520, 0.1, 0.035, 'sine');
+    setTimeout(() => playTone(700, 0.12, 0.025, 'sine'), 55);
   }
 
   function advanceLevel() {
-    if (level >= 100) return;
-   level += 1;
+    level += 1;
     levelCaught = 0;
-     levelTarget = 10 + (level - 1) * 5;
-    timer = getLevelTime();
-   populateFish();
-   gameActive = true;
-   updateHud();
+    setLevel();
+    populateFish();
   }
 
-  function updateFish(fish) {
-   const dx = shark.x - fish.x;
-   const dy = shark.y - fish.y;
-   const dist = Math.hypot(dx, dy) || 1;
-   const danger = Math.max(0, 1 - dist / 260);
+  function updateFish(fish, frameScale) {
+    const dx = shark.x - fish.x;
+    const dy = shark.y - fish.y;
+    const distance = Math.hypot(dx, dy) || 1;
+    const danger = Math.max(0, 1 - distance / 260);
+    fish.memoryX += (shark.x - fish.memoryX) * 0.08 * frameScale;
+    fish.memoryY += (shark.y - fish.memoryY) * 0.08 * frameScale;
+    let biasX = 0;
+    let biasY = 0;
 
-   fish.memoryX += (shark.x - fish.memoryX) * 0.08;
-   fish.memoryY += (shark.y - fish.memoryY) * 0.08;
+    if (distance < 220) {
+      const memoryDx = fish.memoryX - fish.x;
+      const memoryDy = fish.memoryY - fish.y;
+      const memoryDistance = Math.hypot(memoryDx, memoryDy) || 1;
+      biasX -= (dx / distance) * (2.2 + danger * 4) + (memoryDx / memoryDistance) * (0.8 + fish.learning);
+      biasY -= (dy / distance) * (2.2 + danger * 4) + (memoryDy / memoryDistance) * (0.8 + fish.learning);
+      fish.panic = Math.min(1.5, fish.panic + (0.08 + danger * 0.12) * frameScale);
+    } else {
+      fish.panic *= Math.pow(0.92, frameScale);
+      biasX = (world.width / 2 - fish.x) * 0.0007;
+      biasY = (world.height / 2 - fish.y) * 0.0007;
+    }
 
-   let biasX = 0;
-   let biasY = 0;
+    fish.vx += biasX * 0.12 * frameScale;
+    fish.vy += biasY * 0.12 * frameScale;
+    const maxSpeed = fish.speed + fish.learning * 0.8 + fish.panic * 0.9;
+    const speed = Math.hypot(fish.vx, fish.vy) || 1;
+    if (speed > maxSpeed) {
+      fish.vx = fish.vx / speed * maxSpeed;
+      fish.vy = fish.vy / speed * maxSpeed;
+    }
+    fish.x += fish.vx * frameScale;
+    fish.y += fish.vy * frameScale;
 
-   if (dist < 220) {
-    const fleeX = -dx / dist;
-    const fleeY = -dy / dist;
-
-    const memoryDx = fish.memoryX - fish.x;
-    const memoryDy = fish.memoryY - fish.y;
-    const memoryDist = Math.hypot(memoryDx, memoryDy) || 1;
-
-    const memoryFleeX = memoryDx / memoryDist;
-    const memoryFleeY = memoryDy / memoryDist;
-
-    biasX += fleeX * (2.2 + danger * 4.0) + memoryFleeX * (0.8 + fish.learning * 1.0);
-    biasY += fleeY * (2.2 + danger * 4.0) + memoryFleeY * (0.8 + fish.learning * 1.0);
-    fish.panic = Math.min(1.5, fish.panic + 0.08 + danger * 0.12);
-   } else {
-    fish.panic *= 0.92;
-    biasX += (canvas.width / 2 - fish.x) * 0.0007;
-    biasY += (canvas.height / 2 - fish.y) * 0.0007;
-   }
-
-   const targetSpeed = fish.speed + fish.learning * 0.8 + fish.panic * 0.9;
-   fish.vx += biasX * 0.12;
-   fish.vy += biasY * 0.12;
-
-   const currentSpeed = Math.hypot(fish.vx, fish.vy) || 1;
-   if (currentSpeed > targetSpeed) {
-    fish.vx = (fish.vx / currentSpeed) * targetSpeed;
-    fish.vy = (fish.vy / currentSpeed) * targetSpeed;
-   }
-
-   fish.x += fish.vx;
-   fish.y += fish.vy;
-
-  if (fish.y < fish.size || fish.y > canvas.height - fish.size) {
-   fish.y = Math.max(fish.size, Math.min(canvas.height - fish.size, fish.y));
-   fish.vy *= -1;
-  }
-
-  if (fish.x < -fish.size * 3) {
-   spawnFishAtEdge(fish, 'left');
-  } else if (fish.x > canvas.width + fish.size * 3) {
-   spawnFishAtEdge(fish, 'right');
-   }
+    if (fish.y < fish.size || fish.y > world.height - fish.size) {
+      fish.y = Math.max(fish.size, Math.min(world.height - fish.size, fish.y));
+      fish.vy *= -1;
+    }
+    if (fish.x < -fish.size * 3) spawnFishAtEdge(fish, 'left');
+    else if (fish.x > world.width + fish.size * 3) spawnFishAtEdge(fish, 'right');
   }
 
   function drawFish(fish) {
-   const dx = shark.x - fish.x;
-   const dy = shark.y - fish.y;
-   const dist = Math.hypot(dx, dy);
-   const nearShark = dist < 160;
+    const direction = fish.vx >= 0 ? 1 : -1;
+    const length = fish.size * 1.5;
+    const height = fish.size * 0.76;
+    ctx.save();
+    ctx.translate(fish.x, fish.y);
+    ctx.scale(direction, 1);
 
-  const direction = fish.vx >= 0 ? 1 : -1;
-  const bodyLength = fish.size * 1.45;
-  const bodyHeight = fish.size * 0.72;
+    ctx.fillStyle = fish.palette[1];
+    ctx.beginPath();
+    ctx.moveTo(-length * 0.65, 0);
+    ctx.lineTo(-length * 1.35, -height * 0.9);
+    ctx.lineTo(-length * 1.2, 0);
+    ctx.lineTo(-length * 1.35, height * 0.9);
+    ctx.closePath();
+    ctx.fill();
 
-  ctx.save();
-  ctx.translate(fish.x, fish.y);
-  ctx.scale(direction, 1);
-  ctx.fillStyle = nearShark ? `rgba(255, 156, 204, ${0.7 + (160 - dist) / 220})` : '#f1f1f1';
-  ctx.strokeStyle = nearShark ? '#ffb8d9' : '#d7d7d7';
-  ctx.lineWidth = 1.2;
+    ctx.fillStyle = fish.palette[0];
+    ctx.strokeStyle = 'rgba(6, 35, 44, .55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, length, height, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(bodyLength, 0);
-  ctx.quadraticCurveTo(bodyLength * 0.35, -bodyHeight, -bodyLength * 0.7, -bodyHeight * 0.42);
-  ctx.quadraticCurveTo(-bodyLength, 0, -bodyLength * 0.7, bodyHeight * 0.42);
-  ctx.quadraticCurveTo(bodyLength * 0.35, bodyHeight, bodyLength, 0);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(-bodyLength * 0.05, -bodyHeight * 0.35);
-  ctx.lineTo(-bodyLength * 0.28, -fish.size * 0.95);
-  ctx.lineTo(bodyLength * 0.2, -bodyHeight * 0.25);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(-bodyLength * 0.05, bodyHeight * 0.35);
-  ctx.lineTo(-bodyLength * 0.25, fish.size * 0.95);
-  ctx.lineTo(bodyLength * 0.2, bodyHeight * 0.25);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(-bodyLength * 0.55, 0);
-  ctx.lineTo(-bodyLength * 1.22, -fish.size * 0.7);
-  ctx.lineTo(-bodyLength * 1.22, fish.size * 0.7);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = '#17343b';
-  ctx.beginPath();
-  ctx.arc(bodyLength * 0.58, -bodyHeight * 0.18, Math.max(1.5, fish.size * 0.11), 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-  }
-
-  function checkCollision() {
-   for (let i = fishes.length - 1; i >= 0; i--) {
-    const fish = fishes[i];
-    const dist = Math.hypot(shark.x - fish.x, shark.y - fish.y);
-
-    if (dist < shark.size) {
-     fishes.splice(i, 1);
-     score += 1;
-    levelCaught += 1;
-     updateHud();
-
-    if (levelCaught >= levelTarget) {
-      const bonus = 25 + level * 10;
-      score += bonus;
-      updateHud();
-      bonusElement.textContent = bonus;
-      bonusBoard.style.display = 'block';
-      setTimeout(() => { bonusBoard.style.display = 'none'; }, 1200);
-      if (level >= 100) {
-       endGame(true);
-      } else {
-       advanceLevel();
-      }
-      return;
-     }
-
-     if (fishes.length < maxFishes) {
-      fishes.push(createFish());
-     }
+    ctx.fillStyle = fish.palette[1];
+    ctx.beginPath();
+    ctx.moveTo(-fish.size * 0.2, -height * 0.65);
+    ctx.lineTo(-fish.size * 0.65, -fish.size * 1.25);
+    ctx.lineTo(fish.size * 0.25, -height * 0.55);
+    ctx.closePath();
+    ctx.fill();
+    if (fish.stripe) {
+      ctx.fillStyle = fish.palette[1];
+      ctx.fillRect(-fish.size * 0.2, -height * 0.76, fish.size * 0.25, height * 1.52);
     }
-   }
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(length * 0.55, -height * 0.2, fish.size * 0.16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = fish.palette[2];
+    ctx.beginPath();
+    ctx.arc(length * 0.59, -height * 0.2, fish.size * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawShark() {
-   ctx.save();
-   ctx.translate(shark.x, shark.y);
+    ctx.save();
+    ctx.translate(shark.x, shark.y);
+    ctx.rotate(shark.angle);
+    const length = shark.size * 2.05;
+    const height = shark.size * 0.82;
 
-   const angle = Math.atan2(mouseY - shark.y, mouseX - shark.x);
-   ctx.rotate(angle);
-
-    const bodyLength = shark.size * 1.9;
-    const bodyHeight = shark.size * 0.82;
-    ctx.fillStyle = '#f2f2f2';
+    ctx.fillStyle = '#54788a';
+    ctx.strokeStyle = '#294b5c';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(bodyLength, 0);
-    ctx.quadraticCurveTo(bodyLength * 0.35, -bodyHeight, -bodyLength * 0.72, -bodyHeight * 0.45);
-    ctx.quadraticCurveTo(-bodyLength, 0, -bodyLength * 0.72, bodyHeight * 0.45);
-    ctx.quadraticCurveTo(bodyLength * 0.35, bodyHeight, bodyLength, 0);
+    ctx.moveTo(-length * 0.65, 0);
+    ctx.lineTo(-length * 1.45, -shark.size * 0.8);
+    ctx.lineTo(-length * 1.25, 0);
+    ctx.lineTo(-length * 1.45, shark.size * 0.8);
     ctx.closePath();
     ctx.fill();
-
-    ctx.fillStyle = '#eeeeee';
-    ctx.beginPath();
-    ctx.moveTo(-shark.size * 0.25, bodyHeight * 0.32);
-    ctx.lineTo(-shark.size * 0.8, shark.size * 1.4);
-    ctx.lineTo(shark.size * 0.15, bodyHeight * 0.28);
-    ctx.closePath();
-    ctx.fill();
+    ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(-shark.size * 0.2, -bodyHeight * 0.32);
-    ctx.lineTo(-shark.size * 0.7, -shark.size * 1.3);
-    ctx.lineTo(shark.size * 0.18, -bodyHeight * 0.28);
+    ctx.moveTo(-shark.size * 0.35, -height * 0.65);
+    ctx.lineTo(-shark.size * 0.8, -shark.size * 1.55);
+    ctx.lineTo(shark.size * 0.35, -height * 0.65);
     ctx.closePath();
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(-bodyLength * 0.65, 0);
-    ctx.lineTo(-bodyLength * 1.35, -shark.size * 0.58);
-    ctx.lineTo(-bodyLength * 1.35, shark.size * 0.58);
+    ctx.ellipse(0, 0, length, height, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#dcebf0';
+    ctx.beginPath();
+    ctx.ellipse(shark.size * 0.35, height * 0.32, length * 0.72, height * 0.54, 0, 0, Math.PI);
+    ctx.fill();
+
+    ctx.fillStyle = '#456879';
+    ctx.beginPath();
+    ctx.moveTo(-shark.size * 0.1, height * 0.55);
+    ctx.lineTo(-shark.size * 0.75, shark.size * 1.35);
+    ctx.lineTo(shark.size * 0.65, height * 0.5);
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = '#101010';
+    ctx.strokeStyle = '#274958';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i += 1) {
+      ctx.beginPath();
+      ctx.arc(shark.size * (0.72 + i * 0.15), 0, shark.size * 0.38, -0.55, 0.55);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#f8ffff';
     ctx.beginPath();
-    ctx.arc(bodyLength * 0.55, -bodyHeight * 0.24, 3, 0, Math.PI * 2);
+    ctx.arc(length * 0.58, -height * 0.28, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#081b22';
+    ctx.beginPath();
+    ctx.arc(length * 0.61, -height * 0.28, 2.6, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(bodyLength * 0.55, bodyHeight * 0.24, 3, 0, Math.PI * 2);
+    ctx.arc(length * 0.9, height * 0.05, 2.3, 0, Math.PI * 2);
     ctx.fill();
-
-   ctx.restore();
+    ctx.restore();
   }
 
-  let mouseX = canvas.width / 2;
-  let mouseY = canvas.height / 2;
+  function checkCollisions() {
+    for (let i = fishes.length - 1; i >= 0; i -= 1) {
+      const fish = fishes[i];
+      if (Math.hypot(shark.x - fish.x, shark.y - fish.y) >= shark.size + fish.size * 0.35) continue;
+      fishes.splice(i, 1);
+      score += 1;
+      levelCaught += 1;
+      playCatchSound();
+
+      if (levelCaught >= levelTarget) {
+        const bonus = 25 + level * 10;
+        score += bonus;
+        ui.bonus.textContent = bonus;
+        ui['bonus-board'].style.display = 'block';
+        clearTimeout(bonusTimer);
+        bonusTimer = setTimeout(() => { ui['bonus-board'].style.display = 'none'; }, 1200);
+        if (level >= 100) endGame(true);
+        else advanceLevel();
+        updateHud();
+        return;
+      }
+      fishes.push(createFish());
+      updateHud();
+    }
+  }
 
   function updatePointer(event) {
-   const rect = canvas.getBoundingClientRect();
-   mouseX = (event.clientX - rect.left) * canvas.width / rect.width;
-   mouseY = (event.clientY - rect.top) * canvas.height / rect.height;
+    const rect = canvas.getBoundingClientRect();
+    pointerX = Math.max(0, Math.min(world.width, (event.clientX - rect.left) * world.width / rect.width));
+    pointerY = Math.max(0, Math.min(world.height, (event.clientY - rect.top) * world.height / rect.height));
+    if (gameActive) startMusic();
+  }
+
+  function gameLoop(now) {
+    const elapsed = Math.min(50, now - lastFrame);
+    const frameScale = elapsed / (1000 / 60);
+    lastFrame = now;
+    ctx.clearRect(0, 0, world.width, world.height);
+
+    if (gameActive) {
+      timeLeft = Math.max(0, timeLeft - elapsed / 1000);
+      if (timeLeft === 0) endGame(false);
+      else {
+        const dx = pointerX - shark.x;
+        const dy = pointerY - shark.y;
+        if (Math.hypot(dx, dy) > 1) shark.angle = Math.atan2(dy, dx);
+        const smoothing = 1 - Math.pow(1 - shark.speed, frameScale);
+        shark.x += dx * smoothing;
+        shark.y += dy * smoothing;
+        fishes.forEach((fish) => updateFish(fish, frameScale));
+        checkCollisions();
+      }
+      updateHud();
+    }
+
+    fishes.forEach(drawFish);
+    drawShark();
+    requestAnimationFrame(gameLoop);
   }
 
   canvas.addEventListener('pointermove', updatePointer);
   canvas.addEventListener('pointerdown', updatePointer);
-
-  document.addEventListener('pointerdown', () => {
-   if (gameActive && musicToggle.checked) startMusic();
-  }, { once: true });
-
-  pauseBtn.addEventListener('click', () => setPaused(true));
-  resumeBtn.addEventListener('click', () => setPaused(false));
-  pauseRestartBtn.addEventListener('click', () => {
-   resetGame();
-   startMusic();
+  ui['pause-btn'].addEventListener('click', () => setPaused(true));
+  ui['resume-btn'].addEventListener('click', () => setPaused(false));
+  ui['pause-restart-btn'].addEventListener('click', () => { resetGame(); startMusic(); });
+  ui['restart-btn'].addEventListener('click', () => { resetGame(); startMusic(); });
+  ui['settings-btn'].addEventListener('click', () => {
+    ui['pause-menu'].style.display = 'none';
+    ui['settings-panel'].style.display = 'block';
   });
-  settingsBtn.addEventListener('click', () => {
-   pauseMenu.style.display = 'none';
-   settingsPanel.style.display = 'block';
+  ui['settings-close-btn'].addEventListener('click', () => {
+    ui['settings-panel'].style.display = 'none';
+    ui['pause-menu'].style.display = paused ? 'block' : 'none';
   });
-  settingsCloseBtn.addEventListener('click', () => {
-   settingsPanel.style.display = 'none';
-   pauseMenu.style.display = paused ? 'block' : 'none';
+  ui['music-toggle'].addEventListener('change', () => {
+    if (ui['music-toggle'].checked) startMusic();
+    else stopMusic();
   });
-  musicToggle.addEventListener('change', () => {
-   if (musicToggle.checked && !paused && gameActive) startMusic();
-   else stopMusic();
-  });
-
-  function gameLoop() {
-   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-   if (gameActive) {
-    shark.x += (mouseX - shark.x) * shark.speed;
-    shark.y += (mouseY - shark.y) * shark.speed;
-   }
-
-   fishes.forEach((fish) => {
-    if (gameActive) updateFish(fish);
-    drawFish(fish);
-   });
-
-  if (gameActive) checkCollision();
-   drawShark();
-
-   requestAnimationFrame(gameLoop);
-  }
-
-  restartBtn.addEventListener('click', () => {
-   resetGame();
+  ui['music-theme'].addEventListener('change', () => {
+    stopMusic();
+    musicStep = 0;
     startMusic();
   });
+  window.addEventListener('resize', resizeGame);
+  window.addEventListener('orientationchange', () => setTimeout(resizeGame, 100));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && gameActive) setPaused(true);
+  });
 
+  resizeGame();
   resetGame();
-  gameLoop();
+  requestAnimationFrame(gameLoop);
  </script>
 </body>
 </html>
