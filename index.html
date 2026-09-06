@@ -21,101 +21,79 @@
   body {
    margin: 0;
    padding: 0;
-    background: radial-gradient(circle at 50% 0%, #164858 0, transparent 55%), linear-gradient(145deg, var(--bg), var(--bg-2));
+   background: radial-gradient(circle at 50% 0%, #164858 0, transparent 55%), linear-gradient(145deg, var(--bg), var(--bg-2));
    display: flex;
    justify-content: center;
    align-items: center;
-  height: 100dvh;
+   height: 100dvh;
    overflow: hidden;
    color: var(--white);
-    font-family: Georgia, 'Times New Roman', serif;
+   font-family: Georgia, 'Times New Roman', serif;
   }
 
   .game-shell {
-    position: relative;
-    width: min(calc(100vw - 16px), 900px, calc((100dvh - 16px) * 4 / 3));
-    aspect-ratio: 4 / 3;
+   position: relative;
+   width: min(calc(100vw - 16px), 900px, calc((100dvh - 16px) * 4 / 3));
+   aspect-ratio: 4 / 3;
   }
 
   .brand {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--mint);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-size: 14px;
-    text-align: center;
-    z-index: 11;
+   position: absolute;
+   top: 12px;
+   left: 50%;
+   transform: translateX(-50%);
+   color: var(--mint);
+   letter-spacing: 0.08em;
+   text-transform: uppercase;
+   font-size: 14px;
+   text-align: center;
+   z-index: 11;
+   pointer-events: none;
   }
 
   .brand strong { display: block; color: var(--white); font-size: 24px; letter-spacing: 0; }
 
   canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: 2px solid rgba(159, 232, 218, 0.35);
-    border-radius: 22px;
-    background: linear-gradient(to bottom, #082a37, #06161e);
-    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35), 0 0 35px rgba(77, 207, 193, 0.12);
-  cursor: none;
-  touch-action: none;
+   display: block;
+   width: 100%;
+   height: 100%;
+   border: 2px solid rgba(159, 232, 218, 0.35);
+   border-radius: 22px;
+   background: linear-gradient(to bottom, #0a3849, #06161e);
+   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35), 0 0 35px rgba(77, 207, 193, 0.12);
+   touch-action: none;
   }
 
   .hud {
    position: absolute;
    z-index: 10;
-    font-family: Arial, sans-serif;
-    font-size: 15px;
+   font-family: Arial, sans-serif;
+   font-size: 15px;
    font-weight: bold;
    padding: 10px 14px;
    border-radius: 12px;
    background: var(--panel);
    border: 1px solid var(--panel-border);
-    color: var(--white);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+   color: var(--white);
+   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+   pointer-events: none;
   }
 
-  #level-board {
-   top: 18px;
-   left: 20px;
-  }
-
-  #score-board {
-   top: 18px;
-   right: 20px;
-    color: var(--gold);
-  }
-
-  #timer-board {
-   left: 50%;
-   bottom: 18px;
-   transform: translateX(-50%);
-   font-size: 18px;
-    color: var(--mint);
-  }
-
+  #level-board { top: 18px; left: 20px; }
+  #score-board { top: 18px; right: 20px; color: var(--gold); }
+  #timer-board { left: 50%; bottom: 18px; transform: translateX(-50%); font-size: 18px; color: var(--mint); }
   #bonus-board { top: 78px; left: 18px; color: var(--coral); display: none; }
-
-  #hint {
-    position: absolute;
-    right: 18px;
-    bottom: 18px;
-    color: rgba(244, 255, 252, 0.62);
-    font: 13px Arial, sans-serif;
-  }
+  #control-mode-label { top: 78px; right: 20px; font-size: 11px; color: var(--mint); text-transform: uppercase; letter-spacing: 0.1em; }
 
   #pause-btn {
    position: absolute;
    right: 18px;
-   top: 78px;
+   top: 120px;
    z-index: 12;
    border: 1px solid var(--panel-border);
    border-radius: 10px;
    padding: 8px 12px;
-  min-height: 44px;
+   min-height: 44px;
    background: var(--panel);
    color: var(--white);
    font: bold 13px Arial, sans-serif;
@@ -129,7 +107,7 @@
    transform: translate(-50%, -50%);
    z-index: 30;
    display: none;
-   width: min(340px, calc(100vw - 40px));
+   width: min(380px, calc(100vw - 40px));
    padding: 28px;
    border: 1px solid var(--panel-border);
    border-radius: 18px;
@@ -138,14 +116,14 @@
    text-align: center;
   }
 
-  #pause-menu h2, #settings-panel h2 { margin: 0 0 18px; font-size: 28px; }
+  #pause-menu h2, #settings-panel h2 { margin: 0 0 18px; font-size: 28px; color: var(--mint); }
 
   .menu-button {
    display: block;
    width: 100%;
    margin: 9px 0;
-  padding: 11px 15px;
-  min-height: 44px;
+   padding: 11px 15px;
+   min-height: 44px;
    border: 1px solid var(--panel-border);
    border-radius: 10px;
    background: rgba(159, 232, 218, 0.1);
@@ -160,8 +138,31 @@
    display: flex;
    align-items: center;
    justify-content: space-between;
-   margin: 18px 0;
+   margin: 14px 0;
    font: 14px Arial, sans-serif;
+  }
+
+  .control-options {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 8px;
+   margin: 10px 0 18px;
+  }
+  .control-option {
+   padding: 10px;
+   border: 1px solid var(--panel-border);
+   border-radius: 10px;
+   background: rgba(159, 232, 218, 0.05);
+   color: var(--white);
+   font: bold 12px Arial, sans-serif;
+   cursor: pointer;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+  }
+  .control-option.active {
+   background: var(--mint);
+   color: #06232a;
+   border-color: var(--mint);
   }
 
   #status-banner {
@@ -170,126 +171,156 @@
    top: 50%;
    transform: translate(-50%, -50%);
    display: none;
-    min-width: min(320px, calc(100vw - 40px));
-    padding: 28px 24px;
+   min-width: min(320px, calc(100vw - 40px));
+   padding: 28px 24px;
    text-align: center;
-    background: rgba(6, 28, 36, 0.96);
-    border: 1px solid rgba(159, 232, 218, 0.3);
+   background: rgba(6, 28, 36, 0.96);
+   border: 1px solid rgba(159, 232, 218, 0.3);
    border-radius: 18px;
-    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.4);
+   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.4);
    z-index: 20;
   }
 
-  #status-banner strong {
-   display: block;
-   font-size: 30px;
-   margin-bottom: 8px;
-   color: #ffffff;
-  }
-
-  #status-message {
-   font-size: 16px;
-    color: rgba(244, 255, 252, 0.75);
-   margin-bottom: 12px;
-  }
+  #status-banner strong { display: block; font-size: 30px; margin-bottom: 8px; color: var(--gold); }
+  #status-message { font-size: 16px; color: rgba(244, 255, 252, 0.75); margin-bottom: 12px; }
 
   #restart-btn {
-    background: var(--mint);
+   background: var(--mint);
    border: none;
    border-radius: 999px;
-    color: #06232a;
+   color: #06232a;
    font-weight: bold;
    padding: 10px 18px;
    cursor: pointer;
   }
 
-    @media (max-width: 620px) {
-    .brand { top: 10px; font-size: 11px; }
-     .brand strong { font-size: 20px; }
-     .hud { padding: 8px 10px; font-size: 12px; }
-    #level-board, #score-board { top: 58px; }
-     #level-board { left: 12px; }
-     #score-board { right: 12px; }
-      #bonus-board { top: 104px; left: 12px; }
-      #pause-btn { top: 104px; right: 12px; }
-    #timer-board { bottom: 12px; }
-    #hint { display: none; }
-    canvas { border-radius: 16px; }
-    }
+  @media (max-width: 620px) {
+   .brand { top: 10px; font-size: 11px; }
+   .brand strong { font-size: 18px; }
+   .hud { padding: 8px 10px; font-size: 12px; }
+   #level-board, #score-board { top: 52px; }
+   #level-board { left: 10px; }
+   #score-board { right: 10px; }
+   #bonus-board { top: 96px; left: 10px; }
+   #control-mode-label { top: 96px; right: 10px; font-size: 10px; }
+   #pause-btn { top: 110px; right: 10px; }
+   #timer-board { bottom: 10px; }
+   canvas { border-radius: 16px; }
+  }
 
-    @media (orientation: portrait) and (max-width: 620px) {
-      .game-shell {
-        width: min(calc(100vw - 12px), calc((100dvh - 12px) * 3 / 4));
-        aspect-ratio: 3 / 4;
-      }
-    }
+  @media (orientation: portrait) and (max-width: 620px) {
+   .game-shell {
+    width: min(calc(100vw - 12px), calc((100dvh - 12px) * 3 / 4));
+    aspect-ratio: 3 / 4;
+   }
+  }
 
-    select, input { accent-color: var(--mint); }
-    select {
-      max-width: 150px;
-      padding: 7px;
-      border: 1px solid var(--panel-border);
-      border-radius: 8px;
-      background: #0b3039;
-      color: var(--white);
-    }
+  select, input { accent-color: var(--mint); }
+  select {
+   max-width: 150px;
+   padding: 7px;
+   border: 1px solid var(--panel-border);
+   border-radius: 8px;
+   background: #0b3039;
+   color: var(--white);
+  }
  </style>
 </head>
 <body>
  <main class="game-shell">
+  <div class="brand">Ocean arcade <strong>Eat The Fish</strong></div>
+  
+  <div id="level-board" class="hud">Level <span id="level">1</span> · Eaten: <span id="eaten">0</span>/<span id="target">10</span></div>
+  <div id="score-board" class="hud">Score <span id="score">0</span></div>
+  <div id="control-mode-label" class="hud">Mode: <span id="mode-display">Mouse</span></div>
+  <div id="bonus-board" class="hud">Bonus +<span id="bonus">0</span></div>
+  <div id="timer-board" class="hud">Time <span id="timer">30.0</span>s</div>
+  <button id="pause-btn" type="button">Pause</button>
 
- <div class="brand">Ocean arcade <strong>Eat The Fish</strong></div>
- <div id="level-board" class="hud">Level <span id="level">1</span> · Target <span id="target">10</span></div>
- <div id="score-board" class="hud">Score <span id="score">0</span></div>
- <div id="bonus-board" class="hud">Bonus +<span id="bonus">0</span></div>
- <div id="timer-board" class="hud">Time <span id="timer">30.0</span>s</div>
- <div id="hint">Move your pointer to hunt</div>
- <button id="pause-btn" type="button">Pause</button>
+  <div id="pause-menu" role="dialog" aria-label="Pause menu">
+   <h2>Paused</h2>
+   <button id="resume-btn" class="menu-button primary" type="button">Resume</button>
+   <button id="pause-restart-btn" class="menu-button" type="button">Restart</button>
+   <button id="settings-btn" class="menu-button" type="button">Settings</button>
+  </div>
 
- <div id="pause-menu" role="dialog" aria-label="Pause menu">
-  <h2>Paused</h2>
-  <button id="resume-btn" class="menu-button primary" type="button">Resume</button>
-  <button id="pause-restart-btn" class="menu-button" type="button">Restart</button>
-  <button id="settings-btn" class="menu-button" type="button">Settings</button>
- </div>
+  <div id="settings-panel" role="dialog" aria-label="Game settings">
+   <h2>Settings</h2>
+   
+   <div style="text-align:left; font: bold 12px Arial, sans-serif; color: var(--mint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">Control Mode</div>
+   <div class="control-options" id="control-options">
+    <button class="control-option" data-mode="joystick">🕹️ Joystick</button>
+    <button class="control-option" data-mode="touch">👆 Touch</button>
+    <button class="control-option" data-mode="mouse">🖱️ Mouse</button>
+    <button class="control-option" data-mode="keyboard">⌨️ Keyboard</button>
+   </div>
 
- <div id="settings-panel" role="dialog" aria-label="Game settings">
-  <h2>Settings</h2>
-  <label class="setting-row" for="music-toggle">Ocean music <input id="music-toggle" type="checkbox" checked></label>
-  <label class="setting-row" for="music-theme">Music theme
-   <select id="music-theme">
-    <option value="reef">Coral Reef</option>
-    <option value="deep">Deep Blue</option>
-    <option value="tide">Moonlit Tide</option>
-   </select>
-  </label>
-  <label class="setting-row" for="sound-toggle">Sound effects <input id="sound-toggle" type="checkbox" checked></label>
-  <button id="settings-close-btn" class="menu-button primary" type="button">Done</button>
- </div>
+   <label class="setting-row" for="music-toggle">Ocean music <input id="music-toggle" type="checkbox" checked></label>
+   <label class="setting-row" for="music-theme">Music theme
+    <select id="music-theme">
+     <option value="reef">Coral Reef</option>
+     <option value="deep">Deep Blue</option>
+     <option value="tide">Moonlit Tide</option>
+    </select>
+   </label>
+   <label class="setting-row" for="sound-toggle">Sound effects <input id="sound-toggle" type="checkbox" checked></label>
+   <button id="settings-close-btn" class="menu-button primary" type="button">Done</button>
+  </div>
 
- <div id="status-banner">
-  <strong id="status-title">Game Over</strong>
-  <div id="status-message">The shark missed the target.</div>
-  <button id="restart-btn" type="button">Restart Game</button>
- </div>
+  <div id="status-banner">
+   <strong id="status-title">Game Over</strong>
+   <div id="status-message">The shark missed the target.</div>
+   <button id="restart-btn" type="button">Restart Game</button>
+  </div>
 
- <canvas id="gameCanvas"></canvas>
+  <canvas id="gameCanvas"></canvas>
  </main>
 
  <script>
+  const CONFIG = {
+    SHARK_SIZE: 34,
+    SHARK_SPEED: 0.12,
+    BASE_FISHES: 12,
+    MAX_FISHES_CAP: 35,
+    FISH_PANIC_DISTANCE: 220,
+    FISH_PANIC_STRENGTH: 2.2,
+    FISH_WANDER_FORCE: 0.15,
+    FISH_MEMORY_LEARNING: 0.08,
+    PARTICLE_COUNT: 10,
+    SCHOOL_RADIUS: 90,
+    BOUNDARY_MARGIN: 100, // Increased to keep fish central
+    BOUNDARY_FORCE: 0.12,
+    KEYBOARD_SPEED: 6,
+    JOYSTICK_RADIUS: 70,
+    JOYSTICK_DEADZONE: 8
+  };
+
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const ui = Object.fromEntries([
-    'score', 'level', 'target', 'timer', 'bonus', 'bonus-board', 'status-banner',
+    'score', 'level', 'eaten', 'target', 'timer', 'bonus', 'bonus-board', 'status-banner',
     'status-title', 'status-message', 'restart-btn', 'pause-btn', 'pause-menu',
     'resume-btn', 'pause-restart-btn', 'settings-btn', 'settings-panel',
-    'settings-close-btn', 'music-toggle', 'music-theme', 'sound-toggle'
+    'settings-close-btn', 'music-toggle', 'music-theme', 'sound-toggle',
+    'control-options', 'mode-display'
   ].map((id) => [id, document.getElementById(id)]));
 
   const world = { width: 800, height: 600 };
-  const shark = { x: 400, y: 300, size: 32, speed: 0.11, angle: 0 };
+  const shark = { 
+    x: 400, y: 300, 
+    size: CONFIG.SHARK_SIZE, 
+    speed: CONFIG.SHARK_SPEED, 
+    angle: 0, 
+    targetAngle: 0,
+    mouthOpen: 0,
+    tailPhase: 0,
+    finPhase: 0
+  };
   const fishes = [];
-  const maxFishes = 12;
+  const particles = [];
+  const bgBubbles = [];
+  const bgSeaweed = [];
+  
   const fishPalettes = [
     ['#ffd166', '#f4a261', '#5b3a29'],
     ['#75e6da', '#2cb5a8', '#123d46'],
@@ -312,6 +343,46 @@
   let musicTimer;
   let musicStep = 0;
   let bonusTimer;
+  let shakeAmount = 0;
+  let gameTime = 0;
+
+  // Control system
+  let controlMode = 'mouse'; // 'joystick', 'touch', 'mouse', 'keyboard'
+  const keys = {};
+  const joystick = { active: false, baseX: 0, baseY: 0, thumbX: 0, thumbY: 0, touchId: null };
+
+  // Background elements
+  function initBackground() {
+    bgBubbles.length = 0;
+    for (let i = 0; i < 25; i++) {
+      bgBubbles.push({
+        x: Math.random() * world.width,
+        y: Math.random() * world.height,
+        r: 2 + Math.random() * 5,
+        speed: 0.3 + Math.random() * 0.6,
+        wobble: Math.random() * Math.PI * 2
+      });
+    }
+    bgSeaweed.length = 0;
+    for (let i = 0; i < 8; i++) {
+      bgSeaweed.push({
+        x: (i + 0.5) * (world.width / 8) + (Math.random() - 0.5) * 40,
+        height: 60 + Math.random() * 80,
+        phase: Math.random() * Math.PI * 2,
+        segments: 5 + Math.floor(Math.random() * 3)
+      });
+    }
+  }
+
+  function getMaxFishes() {
+    return Math.min(CONFIG.BASE_FISHES + Math.floor(level / 3) * 2, CONFIG.MAX_FISHES_CAP);
+  }
+
+  function setLevel() {
+    levelTarget = Math.min(10 + Math.floor((level - 1) * 1.5), 45);
+    timeLeft = Math.min(90, 25 + levelTarget * 0.8);
+    updateHud();
+  }
 
   function resizeGame() {
     const portrait = matchMedia('(orientation: portrait) and (max-width: 620px)').matches;
@@ -338,33 +409,37 @@
     canvas.width = Math.round(rect.width * dpr);
     canvas.height = Math.round(rect.height * dpr);
     ctx.setTransform(canvas.width / world.width, 0, 0, canvas.height / world.height, 0, 0);
+    initBackground();
   }
 
   function updateHud() {
     ui.score.textContent = score;
     ui.level.textContent = level;
+    ui.eaten.textContent = levelCaught;
     ui.target.textContent = levelTarget;
     ui.timer.textContent = timeLeft.toFixed(1);
   }
 
-  function levelTime() {
-    return Math.min(90, 25 + levelTarget * 0.5);
+  function setControlMode(mode) {
+    controlMode = mode;
+    document.querySelectorAll('.control-option').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    const labels = { joystick: 'Joystick', touch: 'Touch', mouse: 'Mouse', keyboard: 'Keyboard' };
+    ui['mode-display'].textContent = labels[mode];
+    canvas.style.cursor = mode === 'mouse' ? 'none' : 'default';
   }
 
-  function setLevel() {
-    levelTarget = 10 + (level - 1) * 5;
-    timeLeft = levelTime();
-    updateHud();
-  }
-
-  function spawnFishAtEdge(fish, side = Math.random() < 0.5 ? 'left' : 'right') {
-    const offset = fish.size * 3;
-    fish.x = side === 'left' ? -offset : world.width + offset;
-    fish.y = fish.size * 2 + Math.random() * (world.height - fish.size * 4);
-    fish.vx = side === 'left' ? 1.4 + Math.random() * 1.2 : -1.4 - Math.random() * 1.2;
-    fish.vy = (Math.random() - 0.5) * 2.2;
-    fish.memoryX = world.width / 2;
-    fish.memoryY = world.height / 2;
+  function spawnFishFreely(fish) {
+    const margin = CONFIG.BOUNDARY_MARGIN;
+    fish.x = margin + Math.random() * (world.width - margin * 2);
+    fish.y = margin + Math.random() * (world.height - margin * 2);
+    fish.vx = (Math.random() - 0.5) * 3;
+    fish.vy = (Math.random() - 0.5) * 3;
+    fish.memoryX = fish.x;
+    fish.memoryY = fish.y;
+    fish.wanderAngle = Math.random() * Math.PI * 2;
+    fish.tailPhase = Math.random() * Math.PI * 2;
   }
 
   function createFish() {
@@ -373,20 +448,23 @@
       size: shark.size * (0.31 + Math.random() * 0.11),
       vx: 0, vy: 0,
       speed: 1.3 + Math.random() * 1.8,
-      learning: 0.4 + Math.random() * 1.2,
+      learning: 0.4 + Math.random() * 1.2 + (level * 0.15),
       memoryX: world.width / 2,
       memoryY: world.height / 2,
       panic: 0,
+      wanderAngle: Math.random() * Math.PI * 2,
+      tailPhase: Math.random() * Math.PI * 2,
       palette: fishPalettes[Math.floor(Math.random() * fishPalettes.length)],
       stripe: Math.random() > 0.45
     };
-    spawnFishAtEdge(fish);
+    spawnFishFreely(fish);
     return fish;
   }
 
   function populateFish() {
     fishes.length = 0;
-    for (let i = 0; i < maxFishes; i += 1) fishes.push(createFish());
+    const count = getMaxFishes();
+    for (let i = 0; i < count; i += 1) fishes.push(createFish());
   }
 
   function resetGame() {
@@ -395,6 +473,7 @@
     levelCaught = 0;
     paused = false;
     gameActive = true;
+    particles.length = 0;
     setLevel();
     ui['status-banner'].style.display = 'none';
     ui['pause-menu'].style.display = 'none';
@@ -403,7 +482,9 @@
     ui['pause-btn'].textContent = 'Pause';
     shark.x = pointerX = world.width / 2;
     shark.y = pointerY = world.height / 2;
-    shark.angle = 0;
+    shark.angle = shark.targetAngle = 0;
+    shark.mouthOpen = 0;
+    shakeAmount = 0;
     populateFish();
     lastFrame = performance.now();
   }
@@ -415,9 +496,9 @@
     ui['pause-menu'].style.display = 'none';
     ui['settings-panel'].style.display = 'none';
     ui['status-banner'].style.display = 'block';
-    ui['status-title'].textContent = won ? 'Ocean Master!' : 'Game Over';
+    ui['status-title'].textContent = won ? '🏆 Ocean Master!' : '💀 Game Over';
     ui['status-message'].textContent = won
-      ? `You cleared all 100 levels with a score of ${score}.`
+      ? `You cleared all levels with a score of ${score}.`
       : `You reached level ${level}. Final score: ${score}.`;
   }
 
@@ -432,6 +513,9 @@
     else startMusic();
   }
 
+  // ==========================================
+  // AUDIO
+  // ==========================================
   const musicThemes = {
     reef: { wave: 'sine', tempo: 760, notes: [261.63, 329.63, 392, 523.25, 392, 329.63, 293.66, 349.23] },
     deep: { wave: 'triangle', tempo: 980, notes: [130.81, 196, 164.81, 220, 174.61, 196] },
@@ -478,8 +562,8 @@
 
   function playCatchSound() {
     if (!ui['sound-toggle'].checked) return;
-    playTone(520, 0.1, 0.035, 'sine');
-    setTimeout(() => playTone(700, 0.12, 0.025, 'sine'), 55);
+    playTone(520, 0.1, 0.04, 'sine');
+    setTimeout(() => playTone(780, 0.12, 0.03, 'sine'), 55);
   }
 
   function advanceLevel() {
@@ -489,73 +573,197 @@
     populateFish();
   }
 
+  // ==========================================
+  // FISH AI
+  // ==========================================
   function updateFish(fish, frameScale) {
     const dx = shark.x - fish.x;
     const dy = shark.y - fish.y;
     const distance = Math.hypot(dx, dy) || 1;
-    const danger = Math.max(0, 1 - distance / 260);
-    fish.memoryX += (shark.x - fish.memoryX) * 0.08 * frameScale;
-    fish.memoryY += (shark.y - fish.memoryY) * 0.08 * frameScale;
+    const danger = Math.max(0, 1 - distance / CONFIG.FISH_PANIC_DISTANCE);
+    
+    fish.memoryX += (shark.x - fish.memoryX) * CONFIG.FISH_MEMORY_LEARNING * frameScale;
+    fish.memoryY += (shark.y - fish.memoryY) * CONFIG.FISH_MEMORY_LEARNING * frameScale;
+    
     let biasX = 0;
     let biasY = 0;
 
-    if (distance < 220) {
+    if (distance < CONFIG.FISH_PANIC_DISTANCE) {
       const memoryDx = fish.memoryX - fish.x;
       const memoryDy = fish.memoryY - fish.y;
       const memoryDistance = Math.hypot(memoryDx, memoryDy) || 1;
-      biasX -= (dx / distance) * (2.2 + danger * 4) + (memoryDx / memoryDistance) * (0.8 + fish.learning);
-      biasY -= (dy / distance) * (2.2 + danger * 4) + (memoryDy / memoryDistance) * (0.8 + fish.learning);
+      
+      biasX -= (dx / distance) * (CONFIG.FISH_PANIC_STRENGTH + danger * 4) + (memoryDx / memoryDistance) * (0.8 + fish.learning);
+      biasY -= (dy / distance) * (CONFIG.FISH_PANIC_STRENGTH + danger * 4) + (memoryDy / memoryDistance) * (0.8 + fish.learning);
       fish.panic = Math.min(1.5, fish.panic + (0.08 + danger * 0.12) * frameScale);
+      fish.learning = Math.min(4.0, fish.learning + 0.015 * frameScale);
     } else {
       fish.panic *= Math.pow(0.92, frameScale);
-      biasX = (world.width / 2 - fish.x) * 0.0007;
-      biasY = (world.height / 2 - fish.y) * 0.0007;
+      
+      if (Math.random() < 0.05 * frameScale) {
+        fish.wanderAngle = Math.random() * Math.PI * 2;
+      }
+      biasX += Math.cos(fish.wanderAngle) * CONFIG.FISH_WANDER_FORCE;
+      biasY += Math.sin(fish.wanderAngle) * CONFIG.FISH_WANDER_FORCE;
+
+      // STRONGER boundary avoidance
+      const margin = CONFIG.BOUNDARY_MARGIN;
+      if (fish.x < margin) biasX += (margin - fish.x) * CONFIG.BOUNDARY_FORCE;
+      if (fish.x > world.width - margin) biasX -= (fish.x - (world.width - margin)) * CONFIG.BOUNDARY_FORCE;
+      if (fish.y < margin) biasY += (margin - fish.y) * CONFIG.BOUNDARY_FORCE;
+      if (fish.y > world.height - margin) biasY -= (fish.y - (world.height - margin)) * CONFIG.BOUNDARY_FORCE;
+    }
+
+    // Schooling
+    let sepX = 0, sepY = 0;
+    let aliX = 0, aliY = 0;
+    let cohX = 0, cohY = 0;
+    let neighbors = 0;
+
+    for (let other of fishes) {
+      if (fish === other) continue;
+      const d = Math.hypot(fish.x - other.x, fish.y - other.y);
+      if (d < CONFIG.SCHOOL_RADIUS && d > 0) {
+        sepX -= (other.x - fish.x) / d;
+        sepY -= (other.y - fish.y) / d;
+        aliX += other.vx;
+        aliY += other.vy;
+        cohX += other.x;
+        cohY += other.y;
+        neighbors++;
+      }
+    }
+
+    if (neighbors > 0) {
+      const sepWeight = 1.2 + (fish.panic * 2.5);
+      const aliWeight = 0.5;
+      const cohWeight = 0.04;
+      
+      biasX += (sepX * sepWeight) + ((aliX / neighbors) * aliWeight) + (((cohX / neighbors) - fish.x) * cohWeight);
+      biasY += (sepY * sepWeight) + ((aliY / neighbors) * aliWeight) + (((cohY / neighbors) - fish.y) * cohWeight);
     }
 
     fish.vx += biasX * 0.12 * frameScale;
     fish.vy += biasY * 0.12 * frameScale;
+    
     const maxSpeed = fish.speed + fish.learning * 0.8 + fish.panic * 0.9;
     const speed = Math.hypot(fish.vx, fish.vy) || 1;
+    
     if (speed > maxSpeed) {
-      fish.vx = fish.vx / speed * maxSpeed;
-      fish.vy = fish.vy / speed * maxSpeed;
+      fish.vx = (fish.vx / speed) * maxSpeed;
+      fish.vy = (fish.vy / speed) * maxSpeed;
     }
+    
     fish.x += fish.vx * frameScale;
     fish.y += fish.vy * frameScale;
+    
+    // Tail animation phase
+    fish.tailPhase += (0.15 + speed * 0.05) * frameScale;
+  }
 
-    if (fish.y < fish.size || fish.y > world.height - fish.size) {
-      fish.y = Math.max(fish.size, Math.min(world.height - fish.size, fish.y));
-      fish.vy *= -1;
+  // ==========================================
+  // DRAWING - POLISHED
+  // ==========================================
+  function drawBackground() {
+    // Light rays from surface
+    ctx.save();
+    for (let i = 0; i < 4; i++) {
+      const x = (world.width * 0.2) + i * (world.width * 0.2) + Math.sin(gameTime * 0.0003 + i) * 30;
+      const grad = ctx.createLinearGradient(x, 0, x + 80, world.height);
+      grad.addColorStop(0, 'rgba(159, 232, 218, 0.08)');
+      grad.addColorStop(1, 'rgba(159, 232, 218, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 120, 0);
+      ctx.lineTo(x + 200, world.height);
+      ctx.lineTo(x + 40, world.height);
+      ctx.closePath();
+      ctx.fill();
     }
-    if (fish.x < -fish.size * 3) spawnFishAtEdge(fish, 'left');
-    else if (fish.x > world.width + fish.size * 3) spawnFishAtEdge(fish, 'right');
+    ctx.restore();
+
+    // Rising bubbles
+    ctx.save();
+    for (let b of bgBubbles) {
+      b.y -= b.speed;
+      b.wobble += 0.03;
+      const wx = b.x + Math.sin(b.wobble) * 8;
+      if (b.y < -10) {
+        b.y = world.height + 10;
+        b.x = Math.random() * world.width;
+      }
+      ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = 'rgba(159, 232, 218, 0.8)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(wx, b.y, b.r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Seaweed at bottom
+    ctx.save();
+    for (let sw of bgSeaweed) {
+      ctx.strokeStyle = 'rgba(104, 185, 91, 0.5)';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      let px = sw.x;
+      let py = world.height;
+      ctx.moveTo(px, py);
+      const segH = sw.height / sw.segments;
+      for (let i = 1; i <= sw.segments; i++) {
+        const sway = Math.sin(gameTime * 0.001 + sw.phase + i * 0.5) * (i * 3);
+        px = sw.x + sway;
+        py = world.height - i * segH;
+        ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function drawFish(fish) {
     const direction = fish.vx >= 0 ? 1 : -1;
     const length = fish.size * 1.5;
     const height = fish.size * 0.76;
+    const tailWag = Math.sin(fish.tailPhase) * 0.3;
+    
     ctx.save();
     ctx.translate(fish.x, fish.y);
     ctx.scale(direction, 1);
 
+    // Tail (animated)
+    ctx.save();
+    ctx.translate(-length * 0.9, 0);
+    ctx.rotate(tailWag);
     ctx.fillStyle = fish.palette[1];
     ctx.beginPath();
-    ctx.moveTo(-length * 0.65, 0);
-    ctx.lineTo(-length * 1.35, -height * 0.9);
-    ctx.lineTo(-length * 1.2, 0);
-    ctx.lineTo(-length * 1.35, height * 0.9);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-length * 0.5, -height * 0.9);
+    ctx.lineTo(-length * 0.35, 0);
+    ctx.lineTo(-length * 0.5, height * 0.9);
     ctx.closePath();
     ctx.fill();
+    ctx.restore();
 
-    ctx.fillStyle = fish.palette[0];
-    ctx.strokeStyle = 'rgba(6, 35, 44, .55)';
+    // Body with gradient
+    const bodyGrad = ctx.createRadialGradient(-length * 0.2, -height * 0.3, 0, 0, 0, length);
+    bodyGrad.addColorStop(0, fish.palette[0]);
+    bodyGrad.addColorStop(1, fish.palette[1]);
+    
+    ctx.fillStyle = bodyGrad;
+    ctx.strokeStyle = 'rgba(6, 35, 44, .6)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.ellipse(0, 0, length, height, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
+    // Dorsal fin
     ctx.fillStyle = fish.palette[1];
     ctx.beginPath();
     ctx.moveTo(-fish.size * 0.2, -height * 0.65);
@@ -563,18 +771,34 @@
     ctx.lineTo(fish.size * 0.25, -height * 0.55);
     ctx.closePath();
     ctx.fill();
+    
     if (fish.stripe) {
       ctx.fillStyle = fish.palette[1];
+      ctx.globalAlpha = 0.6;
       ctx.fillRect(-fish.size * 0.2, -height * 0.76, fish.size * 0.25, height * 1.52);
+      ctx.globalAlpha = 1;
     }
+
+    // Highlight on top
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(-length * 0.1, -height * 0.4, length * 0.5, height * 0.25, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Eye
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(length * 0.55, -height * 0.2, fish.size * 0.16, 0, Math.PI * 2);
+    ctx.arc(length * 0.55, -height * 0.2, fish.size * 0.18, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = fish.palette[2];
     ctx.beginPath();
-    ctx.arc(length * 0.59, -height * 0.2, fish.size * 0.08, 0, Math.PI * 2);
+    ctx.arc(length * 0.59, -height * 0.2, fish.size * 0.09, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(length * 0.62, -height * 0.25, fish.size * 0.03, 0, Math.PI * 2);
+    ctx.fill();
+    
     ctx.restore();
   }
 
@@ -582,64 +806,229 @@
     ctx.save();
     ctx.translate(shark.x, shark.y);
     ctx.rotate(shark.angle);
-    const length = shark.size * 2.05;
-    const height = shark.size * 0.82;
+    
+    const length = shark.size * 2.2;
+    const height = shark.size * 0.85;
+    const tailWag = Math.sin(shark.tailPhase) * 0.25;
+    const finFlap = Math.sin(shark.finPhase) * 0.15;
 
-    ctx.fillStyle = '#54788a';
+    // Glow/aura
+    const glowGrad = ctx.createRadialGradient(0, 0, shark.size * 0.5, 0, 0, shark.size * 2.5);
+    glowGrad.addColorStop(0, 'rgba(100, 180, 200, 0.15)');
+    glowGrad.addColorStop(1, 'rgba(100, 180, 200, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, shark.size * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Shadow underneath
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(4, height * 0.9, length * 0.85, height * 0.25, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Tail (animated)
+    ctx.save();
+    ctx.translate(-length * 0.85, 0);
+    ctx.rotate(tailWag);
+    
+    const tailGrad = ctx.createLinearGradient(0, -shark.size, 0, shark.size);
+    tailGrad.addColorStop(0, '#6a8fa2');
+    tailGrad.addColorStop(0.5, '#54788a');
+    tailGrad.addColorStop(1, '#3d5a6b');
+    ctx.fillStyle = tailGrad;
     ctx.strokeStyle = '#294b5c';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-length * 0.65, 0);
-    ctx.lineTo(-length * 1.45, -shark.size * 0.8);
-    ctx.lineTo(-length * 1.25, 0);
-    ctx.lineTo(-length * 1.45, shark.size * 0.8);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-length * 0.6, -shark.size * 0.9);
+    ctx.lineTo(-length * 0.4, 0);
+    ctx.lineTo(-length * 0.6, shark.size * 0.9);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    ctx.restore();
 
-    ctx.beginPath();
-    ctx.moveTo(-shark.size * 0.35, -height * 0.65);
-    ctx.lineTo(-shark.size * 0.8, -shark.size * 1.55);
-    ctx.lineTo(shark.size * 0.35, -height * 0.65);
-    ctx.closePath();
-    ctx.fill();
-
+    // Body with gradient
+    const bodyGrad = ctx.createRadialGradient(-length * 0.2, -height * 0.4, shark.size * 0.3, 0, 0, length * 1.1);
+    bodyGrad.addColorStop(0, '#7a9eb0');
+    bodyGrad.addColorStop(0.5, '#54788a');
+    bodyGrad.addColorStop(1, '#3d5a6b');
+    
+    ctx.fillStyle = bodyGrad;
+    ctx.strokeStyle = '#294b5c';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.ellipse(0, 0, length, height, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#dcebf0';
+    // Belly (white underside)
+    const bellyGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bellyGrad.addColorStop(0, 'rgba(220, 235, 240, 0)');
+    bellyGrad.addColorStop(0.4, 'rgba(220, 235, 240, 0.9)');
+    bellyGrad.addColorStop(1, '#dcebf0');
+    ctx.fillStyle = bellyGrad;
     ctx.beginPath();
-    ctx.ellipse(shark.size * 0.35, height * 0.32, length * 0.72, height * 0.54, 0, 0, Math.PI);
+    ctx.ellipse(shark.size * 0.2, height * 0.2, length * 0.85, height * 0.6, 0, 0, Math.PI);
     ctx.fill();
 
-    ctx.fillStyle = '#456879';
+    // Dorsal fin (top)
+    const dorsalGrad = ctx.createLinearGradient(0, -height, 0, -shark.size * 1.5);
+    dorsalGrad.addColorStop(0, '#54788a');
+    dorsalGrad.addColorStop(1, '#3d5a6b');
+    ctx.fillStyle = dorsalGrad;
     ctx.beginPath();
-    ctx.moveTo(-shark.size * 0.1, height * 0.55);
-    ctx.lineTo(-shark.size * 0.75, shark.size * 1.35);
-    ctx.lineTo(shark.size * 0.65, height * 0.5);
+    ctx.moveTo(-shark.size * 0.35, -height * 0.65);
+    ctx.lineTo(-shark.size * 0.85, -shark.size * 1.6);
+    ctx.lineTo(shark.size * 0.35, -height * 0.65);
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
 
-    ctx.strokeStyle = '#274958';
-    ctx.lineWidth = 2;
+    // Pectoral fins (animated flap)
+    ctx.save();
+    ctx.translate(-shark.size * 0.1, height * 0.5);
+    ctx.rotate(finFlap);
+    ctx.fillStyle = '#456879';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-shark.size * 0.7, shark.size * 0.9);
+    ctx.lineTo(shark.size * 0.5, shark.size * 0.1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    // Gill slits
+    ctx.strokeStyle = 'rgba(39, 73, 88, 0.7)';
+    ctx.lineWidth = 1.5;
     for (let i = 0; i < 3; i += 1) {
       ctx.beginPath();
-      ctx.arc(shark.size * (0.72 + i * 0.15), 0, shark.size * 0.38, -0.55, 0.55);
+      ctx.arc(shark.size * (0.45 + i * 0.12), 0, shark.size * 0.25, -0.5, 0.5);
       ctx.stroke();
     }
+
+    // Mouth (animated)
+    const mouthGap = shark.mouthOpen * 12;
+    ctx.fillStyle = '#1a0a0a';
+    ctx.beginPath();
+    ctx.moveTo(length * 0.75, 0);
+    ctx.quadraticCurveTo(length * 0.9, -mouthGap * 1.2, length * 0.98, -mouthGap * 0.3);
+    ctx.lineTo(length * 0.98, mouthGap * 0.3);
+    ctx.quadraticCurveTo(length * 0.9, mouthGap * 1.2, length * 0.75, 0);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Teeth (upper and lower)
+    if (mouthGap > 2) {
+      ctx.fillStyle = '#ffffff';
+      const teethCount = 5;
+      for (let i = 0; i < teethCount; i++) {
+        const t = i / (teethCount - 1);
+        const tx = length * (0.78 + t * 0.18);
+        // Upper teeth
+        ctx.beginPath();
+        ctx.moveTo(tx - 1.5, -mouthGap * 0.3);
+        ctx.lineTo(tx, -mouthGap * 0.3 + 3);
+        ctx.lineTo(tx + 1.5, -mouthGap * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        // Lower teeth
+        ctx.beginPath();
+        ctx.moveTo(tx - 1.5, mouthGap * 0.3);
+        ctx.lineTo(tx, mouthGap * 0.3 - 3);
+        ctx.lineTo(tx + 1.5, mouthGap * 0.3);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    // Eye with specular highlight
     ctx.fillStyle = '#f8ffff';
     ctx.beginPath();
-    ctx.arc(length * 0.58, -height * 0.28, 5, 0, Math.PI * 2);
+    ctx.arc(length * 0.58, -height * 0.32, 6, 0, Math.PI * 2);
     ctx.fill();
+    
     ctx.fillStyle = '#081b22';
     ctx.beginPath();
-    ctx.arc(length * 0.61, -height * 0.28, 2.6, 0, Math.PI * 2);
+    ctx.arc(length * 0.61, -height * 0.32, 3.2, 0, Math.PI * 2);
     ctx.fill();
+    
+    // Specular highlight
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(length * 0.9, height * 0.05, 2.3, 0, Math.PI * 2);
+    ctx.arc(length * 0.63, -height * 0.38, 1.4, 0, Math.PI * 2);
     ctx.fill();
+
+    // Nose dot
+    ctx.fillStyle = '#081b22';
+    ctx.beginPath();
+    ctx.arc(length * 0.92, height * 0.05, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Top highlight on body
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(-length * 0.15, -height * 0.55, length * 0.5, height * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  function drawParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy -= 0.05; // bubbles rise
+      p.life -= 0.025;
+      
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+        continue;
+      }
+      
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4 * p.life, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.globalAlpha = 1.0;
+    }
+  }
+
+  function drawJoystick() {
+    if (!joystick.active) return;
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    
+    // Base
+    ctx.fillStyle = 'rgba(159, 232, 218, 0.15)';
+    ctx.strokeStyle = 'rgba(159, 232, 218, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(joystick.baseX, joystick.baseY, CONFIG.JOYSTICK_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Thumb
+    ctx.fillStyle = 'rgba(159, 232, 218, 0.6)';
+    ctx.beginPath();
+    ctx.arc(joystick.thumbX, joystick.thumbY, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctx.stroke();
+    
     ctx.restore();
   }
 
@@ -647,10 +1036,25 @@
     for (let i = fishes.length - 1; i >= 0; i -= 1) {
       const fish = fishes[i];
       if (Math.hypot(shark.x - fish.x, shark.y - fish.y) >= shark.size + fish.size * 0.35) continue;
+      
       fishes.splice(i, 1);
       score += 1;
       levelCaught += 1;
       playCatchSound();
+
+      shark.mouthOpen = 1.0;
+      shakeAmount = Math.min(12, shakeAmount + 6);
+
+      for (let j = 0; j < CONFIG.PARTICLE_COUNT; j++) {
+        particles.push({
+          x: fish.x,
+          y: fish.y,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 0.5) * 5 - 1,
+          life: 1.0,
+          color: fish.palette[0]
+        });
+      }
 
       if (levelCaught >= levelTarget) {
         const bonus = 25 + level * 10;
@@ -669,42 +1073,181 @@
     }
   }
 
-  function updatePointer(event) {
+  // ==========================================
+  // INPUT HANDLERS
+  // ==========================================
+  function canvasToWorld(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
-    pointerX = Math.max(0, Math.min(world.width, (event.clientX - rect.left) * world.width / rect.width));
-    pointerY = Math.max(0, Math.min(world.height, (event.clientY - rect.top) * world.height / rect.height));
-    if (gameActive) startMusic();
+    return {
+      x: Math.max(0, Math.min(world.width, (clientX - rect.left) * world.width / rect.width)),
+      y: Math.max(0, Math.min(world.height, (clientY - rect.top) * world.height / rect.height))
+    };
   }
 
+  function onPointerDown(e) {
+    if (controlMode === 'touch') {
+      const p = canvasToWorld(e.clientX, e.clientY);
+      pointerX = p.x;
+      pointerY = p.y;
+      if (gameActive) startMusic();
+    } else if (controlMode === 'joystick' && joystick.touchId === null) {
+      const p = canvasToWorld(e.clientX, e.clientY);
+      joystick.active = true;
+      joystick.baseX = p.x;
+      joystick.baseY = p.y;
+      joystick.thumbX = p.x;
+      joystick.thumbY = p.y;
+      joystick.touchId = e.pointerId;
+      canvas.setPointerCapture(e.pointerId);
+      if (gameActive) startMusic();
+    }
+  }
+
+  function onPointerMove(e) {
+    if (controlMode === 'mouse') {
+      const p = canvasToWorld(e.clientX, e.clientY);
+      pointerX = p.x;
+      pointerY = p.y;
+      if (gameActive) startMusic();
+    } else if (controlMode === 'touch' && e.buttons > 0) {
+      const p = canvasToWorld(e.clientX, e.clientY);
+      pointerX = p.x;
+      pointerY = p.y;
+    } else if (controlMode === 'joystick' && e.pointerId === joystick.touchId) {
+      const p = canvasToWorld(e.clientX, e.clientY);
+      let dx = p.x - joystick.baseX;
+      let dy = p.y - joystick.baseY;
+      const dist = Math.hypot(dx, dy);
+      if (dist > CONFIG.JOYSTICK_RADIUS) {
+        dx = (dx / dist) * CONFIG.JOYSTICK_RADIUS;
+        dy = (dy / dist) * CONFIG.JOYSTICK_RADIUS;
+      }
+      joystick.thumbX = joystick.baseX + dx;
+      joystick.thumbY = joystick.baseY + dy;
+    }
+  }
+
+  function onPointerUp(e) {
+    if (controlMode === 'joystick' && e.pointerId === joystick.touchId) {
+      joystick.active = false;
+      joystick.touchId = null;
+    }
+  }
+
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
+
+  // Keyboard
+  window.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+    if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+    }
+    if (gameActive) startMusic();
+  });
+  window.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+  });
+
+  function updateControls(frameScale) {
+    if (controlMode === 'keyboard') {
+      const speed = CONFIG.KEYBOARD_SPEED * frameScale;
+      if (keys['w'] || keys['arrowup']) pointerY = Math.max(0, pointerY - speed);
+      if (keys['s'] || keys['arrowdown']) pointerY = Math.min(world.height, pointerY + speed);
+      if (keys['a'] || keys['arrowleft']) pointerX = Math.max(0, pointerX - speed);
+      if (keys['d'] || keys['arrowright']) pointerX = Math.min(world.width, pointerX + speed);
+    } else if (controlMode === 'joystick' && joystick.active) {
+      const dx = joystick.thumbX - joystick.baseX;
+      const dy = joystick.thumbY - joystick.baseY;
+      const dist = Math.hypot(dx, dy);
+      if (dist > CONFIG.JOYSTICK_DEADZONE) {
+        const power = (dist - CONFIG.JOYSTICK_DEADZONE) / (CONFIG.JOYSTICK_RADIUS - CONFIG.JOYSTICK_DEADZONE);
+        const speed = 8 * power * frameScale;
+        const angle = Math.atan2(dy, dx);
+        pointerX = Math.max(0, Math.min(world.width, pointerX + Math.cos(angle) * speed));
+        pointerY = Math.max(0, Math.min(world.height, pointerY + Math.sin(angle) * speed));
+      }
+    }
+  }
+
+  // ==========================================
+  // GAME LOOP
+  // ==========================================
   function gameLoop(now) {
     const elapsed = Math.min(50, now - lastFrame);
     const frameScale = elapsed / (1000 / 60);
     lastFrame = now;
-    ctx.clearRect(0, 0, world.width, world.height);
+    gameTime = now;
+
+    // Screen shake
+    let shakeX = 0, shakeY = 0;
+    if (shakeAmount > 0.1) {
+      shakeX = (Math.random() - 0.5) * shakeAmount;
+      shakeY = (Math.random() - 0.5) * shakeAmount;
+      shakeAmount *= 0.85;
+    } else {
+      shakeAmount = 0;
+    }
+
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
+    ctx.clearRect(-20, -20, world.width + 40, world.height + 40);
+
+    drawBackground();
 
     if (gameActive) {
       timeLeft = Math.max(0, timeLeft - elapsed / 1000);
       if (timeLeft === 0) endGame(false);
       else {
+        updateControls(frameScale);
+        
         const dx = pointerX - shark.x;
         const dy = pointerY - shark.y;
-        if (Math.hypot(dx, dy) > 1) shark.angle = Math.atan2(dy, dx);
+        
+        if (Math.hypot(dx, dy) > 1) {
+          shark.targetAngle = Math.atan2(dy, dx);
+          let diff = shark.targetAngle - shark.angle;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          shark.angle += diff * 0.18 * frameScale;
+        }
+        
         const smoothing = 1 - Math.pow(1 - shark.speed, frameScale);
         shark.x += dx * smoothing;
         shark.y += dy * smoothing;
+        
+        // Animate shark
+        shark.tailPhase += (0.1 + Math.hypot(dx, dy) * 0.002) * frameScale;
+        shark.finPhase += 0.08 * frameScale;
+        
+        if (shark.mouthOpen > 0) {
+          shark.mouthOpen = Math.max(0, shark.mouthOpen - 0.06 * frameScale);
+        }
+
         fishes.forEach((fish) => updateFish(fish, frameScale));
         checkCollisions();
       }
       updateHud();
     }
 
+    drawParticles();
     fishes.forEach(drawFish);
     drawShark();
+    drawJoystick();
+
+    ctx.restore();
     requestAnimationFrame(gameLoop);
   }
 
-  canvas.addEventListener('pointermove', updatePointer);
-  canvas.addEventListener('pointerdown', updatePointer);
+  // ==========================================
+  // UI EVENT LISTENERS
+  // ==========================================
+  document.querySelectorAll('.control-option').forEach(btn => {
+    btn.addEventListener('click', () => setControlMode(btn.dataset.mode));
+  });
+
   ui['pause-btn'].addEventListener('click', () => setPaused(true));
   ui['resume-btn'].addEventListener('click', () => setPaused(false));
   ui['pause-restart-btn'].addEventListener('click', () => { resetGame(); startMusic(); });
@@ -732,7 +1275,9 @@
     if (document.hidden && gameActive) setPaused(true);
   });
 
+  // Initialize
   resizeGame();
+  setControlMode('mouse');
   resetGame();
   requestAnimationFrame(gameLoop);
  </script>
